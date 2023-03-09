@@ -1,4 +1,4 @@
-# sql-challenge
+# SQL-Employee-Data
 
 ## Background
 - Used the provided information to create a table schema for each of the six CSV files.
