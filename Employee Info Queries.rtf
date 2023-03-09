@@ -1,0 +1,130 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2708
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 DROP TABLE IF EXISTS departments;\
+DROP TABLE IF EXISTS dept_emp;\
+DROP TABLE IF EXISTS dept_manager;\
+DROP TABLE IF EXISTS employees;\
+DROP TABLE IF EXISTS salaries;\
+DROP TABLE IF EXISTS titles;\
+\
+\
+CREATE TABLE departments (\
+	dept_no character varying(4) NOT NULL,\
+	dept_name character varying(20) NOT NULL,\
+	PRIMARY KEY (dept_no)\
+);\
+\
+CREATE TABLE dept_emp (\
+	emp_no integer NOT NULL,\
+  	dept_no character varying(4) NOT NULL,\
+	PRIMARY KEY (emp_no)\
+);\
+\
+CREATE TABLE dept_manager (\
+  	dept_no character varying(4) NOT NULL,\
+  	emp_no integer NOT NULL,\
+	PRIMARY KEY (emp_no)\
+);\
+\
+CREATE TABLE employees (\
+    	emp_no integer NOT NULL,\
+    	emp_title_id character varying(5) NOT NULL,\
+    	birth_date DATE NOT NULL, \
+	first_name character varying(25) NOT NULL,\
+	last_name character varying(25) NOT NULL,\
+	sex character varying(1) NOT NULL,\
+	hire_date DATE NOT NULL\
+	PRIMARY KEY (emp_no)\
+);\
+\
+CREATE TABLE salaries (\
+	emp_no integer NOT NULL,\
+	salary integer NOT NULL\
+);\
+\
+CREATE TABLE titles (\
+	title_id character varying(45) NOT NULL,\
+	title character varying(45) NOT NULL\
+);\
+\
+-- Join the employees and salaries tables\
+SELECT * FROM employees\
+JOIN salaries ON employees.emp_no = salaries.emp_no;\
+\
+-- Join the titles and emp_title_id tables\
+SELECT * FROM employees\
+JOIN salaries ON employees.emp_no = salaries.emp_no\
+JOIN titles ON employees.emp_title_id = titles.title_id;\
+\
+-- Join the dep_emp table with emp_no column\
+SELECT * FROM employees\
+JOIN salaries ON employees.emp_no = salaries.emp_no\
+JOIN titles ON employees.emp_title_id = titles.title_id\
+JOIN dept_emp ON employees.emp_no = dept_emp.emp_no;\
+\
+-- Join the departments table with dept_no column\
+SELECT * FROM employees\
+JOIN salaries ON employees.emp_no = salaries.emp_no\
+JOIN titles ON employees.emp_title_id = titles.title_id\
+JOIN dept_emp ON employees.emp_no = dept_emp.emp_no\
+JOIN departments ON dept_emp.dept_no = departments.dept_no;\
+\
+-- Join the dep_manager with the dept_no and emp_no columns\
+SELECT * FROM employees\
+JOIN salaries ON employees.emp_no = salaries.emp_no\
+JOIN titles ON employees.emp_title_id = titles.title_id\
+JOIN dept_emp ON employees.emp_no = dept_emp.emp_no\
+JOIN departments ON dept_emp.dept_no = departments.dept_no\
+JOIN dept_manager ON departments.dept_no = dept_manager.dept_no AND dept_emp.emp_no = dept_manager.emp_no;\
+\
+-- 1) List the employee number, last name, first name, sex, and salary of each employee.\
+SELECT employees.emp_no, employees.last_name, employees.first_name, employees.sex, salaries.salary\
+FROM employees\
+INNER JOIN salaries ON employees.emp_no = salaries.emp_no;\
+\
+-- 2) List the first name, last name, and hire date for the employees who were hired in 1986.\
+SELECT first_name, last_name, hire_date\
+FROM employees\
+WHERE hire_date BETWEEN '1986-01-01' AND '1986-12-31';\
+\
+-- 3) List the manager of each department along with their department number, department name, employee number, last name, and first name.\
+SELECT departments.dept_no, departments.dept_name, dept_manager.emp_no, employees.last_name, employees.first_name\
+FROM departments\
+INNER JOIN dept_manager ON departments.dept_no = dept_manager.dept_no\
+INNER JOIN employees ON dept_manager.emp_no = employees.emp_no;\
+\
+-- 4) List the department number for each employee along with that employee\'92s employee number, last name, first name, and department name.\
+SELECT employees.emp_no, employees.last_name, employees.first_name, departments.dept_name, dept_emp.dept_no\
+FROM employees\
+INNER JOIN dept_emp ON employees.emp_no = dept_emp.emp_no\
+INNER JOIN departments ON dept_emp.dept_no = departments.dept_no;\
+\
+-- 5) List first name, last name, and sex of each employee whose first name is Hercules and whose last name begins with the letter B.\
+SELECT first_name, last_name, sex\
+FROM employees\
+WHERE first_name = 'Hercules' AND last_name LIKE 'B%';\
+\
+-- 6) List each employee in the Sales department, including their employee number, last name, and first name.\
+SELECT employees.emp_no, employees.last_name, employees.first_name\
+FROM employees\
+INNER JOIN dept_emp ON employees.emp_no = dept_emp.emp_no\
+INNER JOIN departments ON dept_emp.dept_no = departments.dept_no\
+WHERE departments.dept_name = 'Sales';\
+\
+-- 7) List each employee in the Sales and Development departments, including their employee number, last name, first name, and department name.\
+SELECT employees.emp_no, employees.last_name, employees.first_name, departments.dept_name\
+FROM employees\
+INNER JOIN dept_emp ON employees.emp_no = dept_emp.emp_no\
+INNER JOIN departments ON dept_emp.dept_no = departments.dept_no\
+WHERE departments.dept_name IN ('Sales', 'Development');\
+\
+-- 8) List the frequency counts, in descending order, of all the employee last names (that is, how many employees share each last name).\
+SELECT last_name, COUNT(*) AS frequency\
+FROM employees\
+GROUP BY last_name\
+ORDER BY frequency DESC;}
